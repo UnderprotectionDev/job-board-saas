@@ -24,6 +24,10 @@ import { Input } from "@/components/ui/input";
 import { countryList } from "@/app/utils/countries-list";
 import { Textarea } from "@/components/ui/textarea";
 import { UploadDropzone } from "@/components/general/uploadthing-reexported";
+import { createCompany } from "@/app/action";
+import { useState } from "react";
+import Image from "next/image";
+import { XIcon } from "lucide-react";
 
 export function CompanyForm() {
   const form = useForm<z.infer<typeof companySchema>>({
@@ -37,8 +41,21 @@ export function CompanyForm() {
       xAccount: "",
     },
   });
-  function onSubmit(values: z.infer<typeof companySchema>) {
-    console.log(values);
+
+  const [pending, setPending] = useState(false);
+
+  async function onSubmit(values: z.infer<typeof companySchema>) {
+    try {
+      setPending(true);
+      await createCompany(values);
+    } catch (error) {
+      console.log(error);
+      if (error instanceof Error && error.message !== "NEXT_REDIRECT") {
+        console.log("Something went wrong. Please try again.");
+      }
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -154,23 +171,48 @@ export function CompanyForm() {
               <FormLabel>Company Logo</FormLabel>
 
               <FormControl>
-                <UploadDropzone
-                  endpoint="imageUploader"
-                  onClientUploadComplete={(res) => {
-                    field.onChange(res[0].url);
-                  }}
-                  onUploadError={() => {
-                    console.log(error);
-                  }}
-                  className="ut-button:bg-primary ut-button:text-white dark:ut-button:text-black ut-button:hover:bg-primary/90 ut-label:text-muted-foreground ut-allowed-content:text-muted-foreground border-primary"
-                />
+                <div>
+                  {field.value ? (
+                    <div className="relative w-fit">
+                      <Image
+                        src={field.value}
+                        alt="Company Logo"
+                        width={100}
+                        height={100}
+                        className="rounded-lg"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2 "
+                        onClick={() => field.onChange("")}
+                      >
+                        <XIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <UploadDropzone
+                      endpoint="imageUploader"
+                      onClientUploadComplete={(res) => {
+                        field.onChange(res[0].url);
+                      }}
+                      onUploadError={() => {
+                        console.log("Error uploading image");
+                      }}
+                      className="ut-button:bg-primary ut-button:text-white dark:ut-button:text-black ut-button:hover:bg-primary/90 ut-label:text-muted-foreground ut-allowed-content:text-muted-foreground border-primary"
+                    />
+                  )}
+                </div>
               </FormControl>
 
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit" className="w-full">
+          {pending ? "Submitting..." : "Continue"}
+        </Button>
       </form>
     </Form>
   );
