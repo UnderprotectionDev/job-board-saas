@@ -1,3 +1,5 @@
+import { jobSeekerSchema } from "@/app/utils/zod-schemas";
+import { createJobSeeker } from "@/app/action";
 import { UploadDropzone } from "@/components/general/uploadthing-reexported";
 import { Button } from "@/components/ui/button";
 import {
