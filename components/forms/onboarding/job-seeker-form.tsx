@@ -1,5 +1,3 @@
-import { createCompany, createJobSeeker } from "@/app/action";
-import { companySchema, jobSeekerSchema } from "@/app/utils/zod-schemas";
 import { UploadDropzone } from "@/components/general/uploadthing-reexported";
 import { Button } from "@/components/ui/button";
 import {
