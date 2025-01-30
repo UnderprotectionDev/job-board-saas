@@ -1,4 +1,5 @@
-import { jobSeekerSchema } from "@/app/utils/zod-schemas";
+import { createCompany, createJobSeeker } from "@/app/action";
+import { companySchema, jobSeekerSchema } from "@/app/utils/zod-schemas";
 import { UploadDropzone } from "@/components/general/uploadthing-reexported";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,8 +15,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { XIcon } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import PdfImage from "@/public/pdf.png";
 
 export function JobSeekerForm() {
   const form = useForm<z.infer<typeof jobSeekerSchema>>({
@@ -27,8 +30,20 @@ export function JobSeekerForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof jobSeekerSchema>) {
-    console.log(values);
+  const [pending, setPending] = useState(false);
+
+  async function onSubmit(values: z.infer<typeof jobSeekerSchema>) {
+    try {
+      setPending(true);
+      await createJobSeeker(values);
+    } catch (error) {
+      console.log(error);
+      if (error instanceof Error && error.message !== "NEXT_REDIRECT") {
+        console.log("Something went wrong. Please try again.");
+      }
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -71,8 +86,8 @@ export function JobSeekerForm() {
                   {field.value ? (
                     <div className="relative w-fit">
                       <Image
-                        src={field.value}
-                        alt="Company Logo"
+                        src={PdfImage}
+                        alt="Pdf Resume Image"
                         width={100}
                         height={100}
                         className="rounded-lg"
@@ -106,7 +121,9 @@ export function JobSeekerForm() {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit" className="w-full" disabled={pending}>
+          {pending ? "Submitting..." : "Continue"}
+        </Button>
       </form>
     </Form>
   );
