@@ -13,6 +13,9 @@ import NetflixLogo from "@/public/netflix.svg";
 import YoutubeLogo from "@/public/youtube.svg";
 import Image from "next/image";
 import { CreateJobForm } from "@/components/forms/create-job-form";
+import { prisma } from "@/app/utils/db";
+import { redirect } from "next/navigation";
+import { requireUser } from "@/app/utils/require-user";
 
 const companies = [
   { id: 0, name: "ArcJet", logo: ArcJetLogo },
@@ -51,10 +54,40 @@ const stats = [
   { value: "500+", label: "Companies hiring monthly" },
 ];
 
-export default function PostJobPage() {
+async function getCompany(userId: string) {
+  const data = await prisma.company.findUnique({
+    where: {
+      userId: userId,
+    },
+    select: {
+      name: true,
+      location: true,
+      about: true,
+      logo: true,
+      xAccount: true,
+      website: true,
+    },
+  });
+
+  if (!data) {
+    return redirect("/");
+  }
+  return data;
+}
+
+export default async function PostJobPage() {
+  const session = await requireUser();
+  const data = await getCompany(session.id as string);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-5">
-      <CreateJobForm />
+      <CreateJobForm
+        companyLocation={data.location}
+        companyName={data.name}
+        companyAbout={data.about}
+        companyLogo={data.logo}
+        companyWebsite={data.website}
+        companyXAccount={data.xAccount}
+      />
 
       <div className="col-span-1">
         <Card className="lg:sticky lg:top-4">

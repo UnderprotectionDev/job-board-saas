@@ -35,7 +35,23 @@ import { UploadDropzone } from "../general/uploadthing-reexported";
 import { useState } from "react";
 import { JobListingDurationSelector } from "../general/job-listing-duration-selector";
 
-export function CreateJobForm() {
+interface iAppProps {
+  companyLocation: string;
+  companyName: string;
+  companyAbout: string;
+  companyLogo: string;
+  companyWebsite: string;
+  companyXAccount: string | null;
+}
+
+export function CreateJobForm({
+  companyLocation,
+  companyName,
+  companyAbout,
+  companyLogo,
+  companyWebsite,
+  companyXAccount,
+}: iAppProps) {
   const form = useForm<z.infer<typeof jobSchema>>({
     resolver: zodResolver(jobSchema),
     defaultValues: {
@@ -47,12 +63,12 @@ export function CreateJobForm() {
       jobDescription: "",
       listingDuration: 30,
       benefits: [],
-      companyName: "",
-      companyLocation: "",
-      companyAbout: "",
-      companyLogo: "",
-      companyWebsite: "",
-      companyXAccount: "",
+      companyName: companyName,
+      companyLocation: companyLocation,
+      companyAbout: companyAbout,
+      companyLogo: companyLogo,
+      companyWebsite: companyWebsite,
+      companyXAccount: companyXAccount || "",
     },
   });
 
@@ -398,7 +414,7 @@ export function CreateJobForm() {
           </CardContent>
         </Card>
         <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? "Submitting..." : "Continue"}
+          {pending ? "Submitting..." : "Post Job"}
         </Button>
       </form>
     </Form>
