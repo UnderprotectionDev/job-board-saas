@@ -1,9 +1,7 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import { countryList } from "@/app/utils/countries-list";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import {
   Form,
   FormControl,
@@ -11,10 +9,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { jobSchema } from "@/app/utils/zod-schemas";
+} from "../ui/form";
+import { Input } from "../ui/input";
 import {
   Select,
   SelectContent,
@@ -23,71 +19,86 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { countryList } from "@/app/utils/countries-list";
-import { SalaryRangeSelector } from "../general/salary-range-selector";
-import JobDescriptionEditor from "../rich-text-editor/job-description-editor";
-import { BenefitsSelector } from "../general/benefits-selector";
+} from "../ui/select";
 import { Textarea } from "../ui/textarea";
-import Image from "next/image";
 import { XIcon } from "lucide-react";
+import { Button } from "../ui/button";
+import Image from "next/image";
+import { toast } from "sonner";
 import { UploadDropzone } from "../general/uploadthing-reexported";
+import JobDescriptionEditor from "../rich-text-editor/job-description-editor";
 import { useState } from "react";
-import { JobListingDurationSelector } from "../general/job-listing-duration-selector";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { jobSchema } from "@/app/utils/zod-schemas";
+import { SalaryRangeSelector } from "../general/salary-range-selector";
 
-interface iAppProps {
-  companyLocation: string;
+import BenefitsSelector from "../general/benefits-selector";
+import { JobListingDurationSelector } from "../general/job-listing-duration-selector";
+import { createJob } from "@/app/action";
+
+interface CreateJobFormProps {
   companyName: string;
+  companyLocation: string;
   companyAbout: string;
   companyLogo: string;
-  companyWebsite: string;
   companyXAccount: string | null;
+  companyWebsite: string;
 }
 
 export function CreateJobForm({
-  companyLocation,
-  companyName,
   companyAbout,
+  companyLocation,
   companyLogo,
-  companyWebsite,
   companyXAccount,
-}: iAppProps) {
+  companyName,
+  companyWebsite,
+}: CreateJobFormProps) {
   const form = useForm<z.infer<typeof jobSchema>>({
     resolver: zodResolver(jobSchema),
     defaultValues: {
-      jobTitle: "",
+      benefits: [],
+      companyDescription: companyAbout,
+      companyLocation: companyLocation,
+      companyName: companyName,
+      companyWebsite: companyWebsite,
+      companyXAccount: companyXAccount || "",
       employmentType: "",
+      jobDescription: "",
+      jobTitle: "",
       location: "",
       salaryFrom: 0,
       salaryTo: 0,
-      jobDescription: "",
-      listingDuration: 30,
-      benefits: [],
-      companyName: companyName,
-      companyLocation: companyLocation,
-      companyAbout: companyAbout,
       companyLogo: companyLogo,
-      companyWebsite: companyWebsite,
-      companyXAccount: companyXAccount || "",
+      listingDuration: 30,
     },
   });
 
   const [pending, setPending] = useState(false);
-  function onSubmit(values: z.infer<typeof jobSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof jobSchema>) {
+    try {
+      setPending(true);
+
+      await createJob(values);
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setPending(false);
+    }
   }
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="col-span-1 lg:col-span-2 flex flex-col gap-8"
+        className="col-span-1   lg:col-span-2  flex flex-col gap-8"
       >
         <Card>
           <CardHeader>
             <CardTitle>Job Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="jobTitle"
@@ -95,13 +106,12 @@ export function CreateJobForm({
                   <FormItem>
                     <FormLabel>Job Title</FormLabel>
                     <FormControl>
-                      <Input placeholder="Job title" {...field} />
+                      <Input placeholder="Job Title" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="employmentType"
@@ -134,13 +144,13 @@ export function CreateJobForm({
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Job Location</FormLabel>
+                    <FormLabel>Location</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
@@ -161,7 +171,7 @@ export function CreateJobForm({
                         <SelectGroup>
                           <SelectLabel>Location</SelectLabel>
                           {countryList.map((country) => (
-                            <SelectItem key={country.code} value={country.name}>
+                            <SelectItem value={country.name} key={country.code}>
                               <span>{country.flagEmoji}</span>
                               <span className="pl-2">{country.name}</span>
                             </SelectItem>
@@ -169,6 +179,7 @@ export function CreateJobForm({
                         </SelectGroup>
                       </SelectContent>
                     </Select>
+
                     <FormMessage />
                   </FormItem>
                 )}
@@ -211,7 +222,7 @@ export function CreateJobForm({
                 <FormItem>
                   <FormLabel>Benefits</FormLabel>
                   <FormControl>
-                    <BenefitsSelector field={field as any} />
+                    <BenefitsSelector field={field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -330,13 +341,13 @@ export function CreateJobForm({
 
             <FormField
               control={form.control}
-              name="companyAbout"
+              name="companyDescription"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Company Description</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Company About"
+                      placeholder="Company Description"
                       className="min-h-[120px]"
                       {...field}
                     />
@@ -378,11 +389,13 @@ export function CreateJobForm({
                           endpoint="imageUploader"
                           onClientUploadComplete={(res) => {
                             field.onChange(res[0].url);
+                            toast.success("Logo uploaded successfully!");
                           }}
                           onUploadError={() => {
-                            console.log("error");
+                            toast.error(
+                              "Something went wrong. Please try again."
+                            );
                           }}
-                          className="ut-button:bg-primary ut-button:text-white dark:ut-button:text-black ut-button:hover:bg-primary/90 ut-label:text-muted-foreground ut-allowed-content:text-muted-foreground border-primary"
                         />
                       )}
                     </div>
@@ -414,7 +427,7 @@ export function CreateJobForm({
           </CardContent>
         </Card>
         <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? "Submitting..." : "Post Job"}
+          {pending ? "Submitting..." : "Continue"}
         </Button>
       </form>
     </Form>

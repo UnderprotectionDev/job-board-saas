@@ -1,21 +1,25 @@
-import { benefits } from "@/app/utils/list-of-benefits";
-import { Badge } from "../ui/badge";
-import { ControllerRenderProps } from "react-hook-form";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
-interface iAppProps {
-  field: ControllerRenderProps;
+import { benefits } from "@/app/utils/list-of-benefits";
+import { Badge } from "@/components/ui/badge";
+
+interface BenefitsSelectorProps {
+  field: any; // Replace with proper type if needed
 }
 
-export function BenefitsSelector({ field }: iAppProps) {
-  function toggleBenefit(benefitId: string) {
+export default function BenefitsSelector({ field }: BenefitsSelectorProps) {
+  const toggleBenefit = (benefitId: string) => {
     const currentBenefits = field.value || [];
     const newBenefits = currentBenefits.includes(benefitId)
       ? currentBenefits.filter((id: string) => id !== benefitId)
       : [...currentBenefits, benefitId];
+
     field.onChange(newBenefits);
-  }
+  };
+
   return (
-    <div>
+    <div className="">
       <div className="flex flex-wrap gap-3">
         {benefits.map((benefit) => {
           const isSelected = (field.value || []).includes(benefit.id);
@@ -33,6 +37,10 @@ export function BenefitsSelector({ field }: iAppProps) {
             </Badge>
           );
         })}
+      </div>
+      <div className="mt-4 text-sm text-muted-foreground">
+        Selected benefits:{" "}
+        <span className="text-primary">{(field.value || []).length}</span>
       </div>
     </div>
   );

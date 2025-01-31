@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import {
   Card,
   CardContent,
@@ -5,25 +6,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import React from "react";
 import ArcJetLogo from "@/public/arcjet.jpg";
 import InngestLogo from "@/public/inngest-locale.png";
-import TailwindLogo from "@/public/tailwindcss.svg";
-import SpotifyLogo from "@/public/spotify.svg";
-import NetflixLogo from "@/public/netflix.svg";
-import YoutubeLogo from "@/public/youtube.svg";
 import Image from "next/image";
 import { CreateJobForm } from "@/components/forms/create-job-form";
 import { prisma } from "@/app/utils/db";
-import { redirect } from "next/navigation";
 import { requireUser } from "@/app/utils/require-user";
+import { redirect } from "next/navigation";
 
 const companies = [
   { id: 0, name: "ArcJet", logo: ArcJetLogo },
   { id: 1, name: "Inngest", logo: InngestLogo },
-  { id: 2, name: "Tailwind", logo: TailwindLogo },
-  { id: 3, name: "Spotify", logo: SpotifyLogo },
-  { id: 4, name: "Netflix", logo: NetflixLogo },
-  { id: 5, name: "Youtube", logo: YoutubeLogo },
+  { id: 2, name: "ArcJet", logo: ArcJetLogo },
+  { id: 3, name: "Inngest", logo: InngestLogo },
+  { id: 4, name: "ArcJet", logo: ArcJetLogo },
+  { id: 5, name: "Inngest", logo: InngestLogo },
 ];
 
 const testimonials = [
@@ -75,18 +73,18 @@ async function getCompany(userId: string) {
   return data;
 }
 
-export default async function PostJobPage() {
+const PostJobPage = async () => {
   const session = await requireUser();
   const data = await getCompany(session.id as string);
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-5">
       <CreateJobForm
-        companyLocation={data.location}
-        companyName={data.name}
         companyAbout={data.about}
+        companyLocation={data.location}
         companyLogo={data.logo}
-        companyWebsite={data.website}
+        companyName={data.name}
         companyXAccount={data.xAccount}
+        companyWebsite={data.website}
       />
 
       <div className="col-span-1">
@@ -126,7 +124,7 @@ export default async function PostJobPage() {
                   className="border-l-2 border-primary pl-4"
                 >
                   <p className="text-sm italic text-muted-foreground">
-                    &quot;{testimonial.quote}&quot;
+                    "{testimonial.quote}"
                   </p>
                   <footer className="mt-2 text-sm font-medium">
                     - {testimonial.author}, {testimonial.company}
@@ -151,4 +149,6 @@ export default async function PostJobPage() {
       </div>
     </div>
   );
-}
+};
+
+export default PostJobPage;
