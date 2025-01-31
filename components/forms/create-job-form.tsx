@@ -427,7 +427,7 @@ export function CreateJobForm({
           </CardContent>
         </Card>
         <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? "Submitting..." : "Continue"}
+          {pending ? "Submitting..." : "Create Job Post"}
         </Button>
       </form>
     </Form>
