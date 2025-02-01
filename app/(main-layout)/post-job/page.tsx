@@ -9,6 +9,10 @@ import {
 import React from "react";
 import ArcJetLogo from "@/public/arcjet.jpg";
 import InngestLogo from "@/public/inngest-locale.png";
+import TailwindLogo from "@/public/tailwindcss.svg";
+import NetflixLogo from "@/public/netflix.svg";
+import SpotifyLogo from "@/public/spotify.svg";
+import YoutubeLogo from "@/public/youtube.svg";
 import Image from "next/image";
 import { CreateJobForm } from "@/components/forms/create-job-form";
 import { prisma } from "@/app/utils/db";
@@ -18,10 +22,10 @@ import { redirect } from "next/navigation";
 const companies = [
   { id: 0, name: "ArcJet", logo: ArcJetLogo },
   { id: 1, name: "Inngest", logo: InngestLogo },
-  { id: 2, name: "ArcJet", logo: ArcJetLogo },
-  { id: 3, name: "Inngest", logo: InngestLogo },
-  { id: 4, name: "ArcJet", logo: ArcJetLogo },
-  { id: 5, name: "Inngest", logo: InngestLogo },
+  { id: 2, name: "Tailwind", logo: TailwindLogo },
+  { id: 3, name: "Netflix", logo: NetflixLogo },
+  { id: 4, name: "Spotify", logo: SpotifyLogo },
+  { id: 5, name: "Youtube", logo: YoutubeLogo },
 ];
 
 const testimonials = [
